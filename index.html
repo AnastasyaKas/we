@@ -14,4 +14,13 @@
     tg.ready(); // сообщаем Telegram, что UI готов
 </script>
 </body>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+
+    // 👉 просим Telegram открыть окно во весь экран
+    tg.expand();
+</script>
+
 </html>
