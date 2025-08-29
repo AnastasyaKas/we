@@ -1,26 +1,52 @@
 <!doctype html>
 <html>
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8">
     <title>Моё мини-приложение</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        html, body { height: 100%; margin: 0; }
+        /* Контейнер растягиваем на всю доступную высоту WebApp:
+           1) сначала Telegram var, 2) потом 100dvh (новые браузеры), 3) потом 100vh как запасной вариант */
+        .app {
+            min-height: var(--tg-viewport-height, 100dvh);
+            min-height: 100dvh;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 16px);
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            text-align: center;
+        }
+    </style>
 </head>
-<body style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin:0; padding:32px; text-align:center;">
+<body>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<h1>Привет!</h1>
-<p>Это пустое окно мини-приложения. Позже добавим функционал.</p>
-<script>
-    const tg = window.Telegram.WebApp;
-    tg.ready(); // сообщаем Telegram, что UI готов
-</script>
-</body>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<div class="app">
+    <div>
+        <h1>Привет!</h1>
+        <p>Окно занимает всю доступную высоту внутри Telegram.</p>
+    </div>
+</div>
+
 <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
+    tg.expand(); // разворачиваем максимально
 
-    // 👉 просим Telegram открыть окно во весь экран
-    tg.expand();
+    // Дополнительно: синхронизируем высоту по событию Telegram
+    function applyAppHeight() {
+        // Берём стабильную высоту, если есть
+        const h = (tg.viewportStableHeight || tg.viewportHeight);
+        if (h && typeof h === 'number') {
+            document.documentElement.style.setProperty('--tg-viewport-height', h + 'px');
+        }
+    }
+    applyAppHeight();
+    tg.onEvent('viewportChanged', applyAppHeight);
 </script>
-
+</body>
 </html>
