@@ -5,48 +5,76 @@
     <title>Моё мини-приложение</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        html, body { height: 100%; margin: 0; }
-        /* Контейнер растягиваем на всю доступную высоту WebApp:
-           1) сначала Telegram var, 2) потом 100dvh (новые браузеры), 3) потом 100vh как запасной вариант */
-        .app {
-            min-height: var(--tg-viewport-height, 100dvh);
-            min-height: 100dvh;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 16px);
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-            text-align: center;
+        body { font-family: sans-serif; margin: 0; padding: 20px; background: #f9f9f9; }
+        .card {
+            background: #fff; border-radius: 12px; padding: 20px; margin: 10px 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
+        button {
+            display: block; width: 100%; margin: 8px 0; padding: 12px;
+            font-size: 16px; border: none; border-radius: 8px;
+            background: #0088cc; color: #fff; cursor: pointer;
+        }
+        button:hover { background: #0077b5; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<div class="app">
-    <div>
-        <h1>Привет!</h1>
-        <p>Окно занимает всю доступную высоту внутри Telegram.</p>
-    </div>
+<!-- Главный экран -->
+<div id="home" class="card">
+    <h2>Привет 👋</h2>
+    <p>Здесь будет твой тест.</p>
+    <button onclick="startTest()">Тест: Какая ты личность?</button>
+</div>
+
+<!-- Экран теста -->
+<div id="quiz" class="card hidden">
+    <h3 id="question"></h3>
+    <div id="answers"></div>
+</div>
+
+<!-- Экран результата -->
+<div id="result" class="card hidden">
+    <h2>Результат</h2>
+    <p id="resultText"></p>
+    <button onclick="restart()">Пройти снова</button>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
-    tg.expand(); // разворачиваем максимально
+    tg.expand();
 
-    // Дополнительно: синхронизируем высоту по событию Telegram
-    function applyAppHeight() {
-        // Берём стабильную высоту, если есть
-        const h = (tg.viewportStableHeight || tg.viewportHeight);
-        if (h && typeof h === 'number') {
-            document.documentElement.style.setProperty('--tg-viewport-height', h + 'px');
-        }
+    // Вопросы теста
+    const questions = [
+        { q: "Тебе больше нравится:", a: ["Планировать", "Импровизировать"] },
+        { q: "В компании ты чаще:", a: ["Слушаешь", "Говоришь"] },
+        { q: "Ты предпочитаешь:", a: ["Логика", "Эмоции"] },
+        { q: "Ближе к тебе:", a: ["Одиночество", "Толпа"] },
+        { q: "Решения принимаешь:", a: ["Быстро", "Долго"] },
+    ];
+
+    let current = 0;
+    let score = 0;
+
+    function startTest() {
+        document.getElementById("home").classList.add("hidden");
+        document.getElementById("quiz").classList.remove("hidden");
+        current = 0;
+        score = 0;
+        showQuestion();
     }
-    applyAppHeight();
-    tg.onEvent('viewportChanged', applyAppHeight);
-</script>
-</body>
-</html>
+
+    function showQuestion() {
+        if (current >= questions.length) {
+            showResult();
+            return;
+        }
+        const q = questions[current];
+        document.getElementById("question").textContent = q.q;
+        const answersDiv = document.getElementById("answers");
+        answersDiv.innerHTML = "";
+        q.a.forEach((ans, i) => {
+            const btn = document.c
